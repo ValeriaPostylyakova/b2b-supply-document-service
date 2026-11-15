@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     REDIS_PORT: int = Field(default=6379)
     REDIS_DB: int = Field(default=1)
     
+    S3_KEY_ID: str = Field(default="minioadmin")
+    S3_SECRET: str = Field(default="minioadmin")
+    
+    S3_INTERNAL_URL: str = Field(default="http://minio:9000")
+    S3_EXTERNAL_URL: str = Field(default="http://localhost:9000")
+
+    S3_BUCKET_NAME: str = Field(default="b2b-supply-core-private")
+    
     RABBITMQ_HOST: str = Field(default='localhost')
     RABBITMQ_PORT: int = Field(default=5672)
     RABBITMQ_USER: str = Field(default='guest')
@@ -45,7 +53,7 @@ class Settings(BaseSettings):
     
     @property
     def RABBITMQ_URL(self) -> str:
-        return f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/"
+        return f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}//"
 
     model_config = SettingsConfigDict(
         env_file=ROOT_DIR / ".env", env_file_encoding="utf-8", extra="ignore"

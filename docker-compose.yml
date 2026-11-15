@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  notification-service:
+  documents-service:
     build: .  
     working_dir: /app
     environment:
@@ -17,21 +17,21 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - REDIS_HOST=core_redis_broker
       - REDIS_PORT=6379
-      - REDIS_DB=1
+      - REDIS_DB=2
     volumes:
       - ./app:/app/app
       - ./migrations:/app/migrations
       - ./alembic.ini:/app/alembic.ini
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
-      - "8003:8000"
+      - "8002:8000"
     depends_on:
-      - notification-db
+      - documents-db
     networks:
       - default
       - shared_rabbitmq_net
 
-  notification-worker:
+  documents-worker:
     build: .
     working_dir: /app
     environment:
@@ -52,14 +52,14 @@ services:
       - ./app:/app/app
     command: celery -A app.core.celery_app:celery_app worker --loglevel=info
     depends_on:
-      - notification-db
+      - documents-db
     networks:
       - default
       - shared_rabbitmq_net
 
-  notification-db:
+  documents-db:
     image: postgres:16-alpine
-    container_name: notification-db
+    container_name: documents-db
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
@@ -67,12 +67,12 @@ services:
     ports:
       - "5435:5432" 
     volumes:
-      - notification_db_data:/var/lib/postgresql/data
+      - documents_db_data:/var/lib/postgresql/data
     networks:
       - default
 
 volumes:
-  notification_db_data:
+  documents_db_data:
 
 networks:
   default:
