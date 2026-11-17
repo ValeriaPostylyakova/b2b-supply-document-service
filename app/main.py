@@ -11,6 +11,9 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi import APIRouter
+from app.api.v1.endpoints.documents import router as documents_router
+import httpx
 
 rabbitmq_assets = {}
 
@@ -18,20 +21,27 @@ rabbitmq_assets = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await redis_async_client.ping()
+    app.state.http_client = httpx.AsyncClient(timeout=3.0)
     yield
     await redis_async_client.close()
-
+    await app.state.http_client.aclose()
 
 app = FastAPI(
-    title="Notification Service",
+    title="Documents Service",
     version="1.0.0",
     lifespan=lifespan,
     debug=settings.DEBUG,
 )
 
 
+api_v1_router = APIRouter(prefix="/api/v1")
+api_v1_router.include_router(documents_router)
+
+app.include_router(api_v1_router)
+
+
 origins = [
-    "http://localhost:8000",
+    "http://django-server:8000",
     "http://localhost:3000",
 ]
 

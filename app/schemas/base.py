@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseResponse(BaseModel):
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

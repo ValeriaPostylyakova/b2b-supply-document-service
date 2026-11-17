@@ -9,6 +9,9 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 class Settings(BaseSettings):
     DEBUG: bool = Field(default=False)
     SECRET_KEY: str = Field(default="super_secret_key_12345")
+    DRF_CORE_URL: str = Field(default="http://django-server:8000")
+    
+    JWT_SECRET_KEY: str = Field(default='')
 
     DB_USER: str = Field(default="DB")
     DB_PASSWORD: str = Field(default="DB")
@@ -34,8 +37,8 @@ class Settings(BaseSettings):
     RABBITMQ_PASSWORD: str = Field(default='guest')
     
     EXCHANGE_NAME: str = Field(default='b2b.events')
-    QUEUE_NAME: str = Field(default="notifications.events")
-
+    QUEUE_NAME: str = Field(default="documents.events")
+    
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

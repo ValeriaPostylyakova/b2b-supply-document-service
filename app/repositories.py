@@ -3,6 +3,15 @@ from sqlalchemy.future import select
 from uuid import UUID
 from app.models import Document, DocumentType
 
+class DocumentAsyncRepository:
+    def __init__(self, db_session: AsyncSession):
+        self.session = db_session
+
+    async def get_documents_by_order_id(self, order_id: UUID) -> list[Document]:
+        stmt = select(Document).where(Document.order_id == order_id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
 class DocumentSyncRepository:
     def __init__(self, db_session):
         self.session = db_session
@@ -37,3 +46,4 @@ class DocumentSyncRepository:
         self.session.commit()
         self.session.refresh(doc)
         return doc
+    
