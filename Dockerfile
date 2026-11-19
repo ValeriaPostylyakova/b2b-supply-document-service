@@ -24,7 +24,7 @@ COPY pyproject.toml uv.lock* ./
 
 RUN uv sync --frozen --no-dev --no-cache || uv sync --no-dev --no-cache
 
-COPY ./app /app/app
+COPY ./app /app/app\nCOPY ./migrations /app/migrations\nCOPY alembic.ini /app/alembic.ini
 
 ENV PATH="/app/.venv/bin:$PATH"
 

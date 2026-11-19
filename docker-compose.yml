@@ -1,67 +1,76 @@
 x-common-env: &common-env
   PYTHONPATH: /app
-  DB_HOST: ${DB_HOST}
-  DB_PORT: ${DB_PORT}
-  DB_NAME: ${DB_NAME}
-  DB_USER: ${DB_USER}
-  DB_PASSWORD: ${DB_PASSWORD}
-  RABBITMQ_HOST: core_rabbitmq_broker
-  RABBITMQ_PORT: 5672
-  RABBITMQ_USER: ${RABBITMQ_USER}
-  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-  REDIS_HOST: core_redis_broker
-  REDIS_PORT: 6379
-  REDIS_DB: 2
+  DEBUG: "false"
+  DB_HOST: documents-db
+  DB_PORT: 5432
+  DB_NAME: ${DB_NAME:-documents_db}
+  DB_USER: ${DB_USER:-documents_user}
+  DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+  DRF_CORE_URL: ${DRF_CORE_URL:-http://django-server:8000}
+  RABBITMQ_HOST: ${RABBITMQ_HOST:-core_rabbitmq_broker}
+  RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+  RABBITMQ_USER: ${RABBITMQ_USER:?Set RABBITMQ_USER in .env}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+  REDIS_HOST: ${REDIS_HOST:-core_redis_broker}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+  REDIS_DB: "2"
+  S3_KEY_ID: ${S3_KEY_ID:?Set S3_KEY_ID in .env}
+  S3_SECRET: ${S3_SECRET:?Set S3_SECRET in .env}
+  S3_INTERNAL_URL: ${S3_INTERNAL_URL:-http://minio:9000}
+  S3_EXTERNAL_URL: ${S3_EXTERNAL_URL:-http://localhost:9000}
+  S3_BUCKET_NAME: ${S3_BUCKET_NAME:-b2b-supply-core-private}
+  QUEUE_NAME: ${QUEUE_NAME:-documents.events}
 
 x-documents-common: &documents-common
-  build: .
+  build:
+    context: .
+    dockerfile: Dockerfile
   working_dir: /app
   environment: *common-env
-  volumes:
-    - ./app:/app/app
-    - ./migrations:/app/migrations
-    - ./alembic.ini:/app/alembic.ini
   depends_on:
-    - documents-db
+    documents-db:
+      condition: service_healthy
   networks:
     - default
     - shared_rabbitmq_net
+  restart: unless-stopped
 
 services:
   documents-service:
     <<: *documents-common
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     ports:
-      - "8002:8000"
+      - "${DOCUMENTS_PORT:-8002}:8000"
 
   documents-consumer:
     <<: *documents-common
-    command: uv run python -u -m app.consumer
-    restart: unless-stopped
+    command: python -u -m app.consumer
 
   documents-worker:
     <<: *documents-common
     environment:
       <<: *common-env
-      REDIS_DB: 1
-    volumes:
-      - ./app:/app/app
+      REDIS_DB: "1"
     command: celery -A app.core.celery_app:celery_app worker --loglevel=info
-    restart: unless-stopped
 
   documents-db:
     image: postgres:16-alpine
-    container_name: documents-db
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-documents_db}
+      POSTGRES_USER: ${DB_USER:-documents_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
     ports:
-      - "5435:5432"
+      - "127.0.0.1:${DB_EXTERNAL_PORT:-5435}:5432"
     volumes:
       - documents_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-documents_user} -d ${DB_NAME:-documents_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - default
+    restart: unless-stopped
 
 volumes:
   documents_db_data:

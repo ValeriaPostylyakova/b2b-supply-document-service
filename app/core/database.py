@@ -10,14 +10,14 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
+engine = create_async_engine(settings.DATABASE_URL, echo=False)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 SYNC_DATABASE_URL = settings.DATABASE_URL.replace("+asyncpg", "")
 
 sync_engine = create_engine(
     SYNC_DATABASE_URL,
-    echo=True,
+    echo=False,
     pool_pre_ping=True,
 )
 

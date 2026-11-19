@@ -1,4 +1,3 @@
-# --- Python & Bytecode ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,73 +21,43 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# --- Virtual Environments & Package Managers ---
-.env
-.venv
-env/
+.venv/
 venv/
 ENV/
-env.bak/
-venv.bak/
-.poetry/
+env/
+.uv/
 .pdm-python
 .pdm-build/
-__pypackages__/
-.uv/
 
-# --- Secrets & Environment Variables ---
+.env
 .env.*
 !.env.example
 *.pem
 *.key
-secrets/
 
-# --- Testing, Coverage & Linters ---
 .pytest_cache/
 .coverage
-.coverage.*
 htmlcov/
 .tox/
 .nox/
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
 .mypy_cache/
-.dmypy.json
-dmypy.json
 .ruff_cache/
+.hypothesis/
 
-# --- Databases & Caches (Local) ---
+*.log
+logs/
+*.sqlite
 *.sqlite3
 *.db
-dump.rdb
-celerybeat-schedule
-celerybeat.pid
 
-# --- Logs ---
-logs/
-*.log
-
-# --- Docker & Kubernetes ---
 .docker/
 docker-compose.override.yml
 
-# --- IDEs & Editors ---
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.project
-.pydevproject
-.settings/
 
-# --- OS Specific ---
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
