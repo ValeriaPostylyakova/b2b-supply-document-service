@@ -1,6 +1,5 @@
 FROM python:3.12-slim
 
-# Устанавливаем системные зависимости для WeasyPrint (Pango, GLib, HarfBuzz) и шрифты с кириллицей
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 \
     libpangoft2-1.0-0 \
@@ -19,12 +18,13 @@ ENV UV_COMPILE_BYTECODE=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Копируем оба файла зависимостей (если uv.lock есть, сборка будет быстрее и воспроизводимее)
 COPY pyproject.toml uv.lock* ./
 
 RUN uv sync --frozen --no-dev --no-cache || uv sync --no-dev --no-cache
 
-COPY ./app /app/app\nCOPY ./migrations /app/migrations\nCOPY alembic.ini /app/alembic.ini
+COPY ./app /app/app
+COPY ./migrations /app/migrations
+COPY alembic.ini /app/alembic.ini
 
 ENV PATH="/app/.venv/bin:$PATH"
 

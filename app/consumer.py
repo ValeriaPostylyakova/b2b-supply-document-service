@@ -1,20 +1,26 @@
 import asyncio
 import json
-import uuid
+import logging
+import sys
 
 import aio_pika
+from pydantic import ValidationError
 
 from app.core.config import settings
-import logging
-from app.tasks import generate_order_invoice_task
 from app.schemas.invoice import InvoiceGeneratePayload
-from pydantic import ValidationError
-    
+from app.tasks import generate_order_invoice_task
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    stream=sys.stdout,
+)
+
 logger = logging.getLogger(__name__)
+
 
 async def process_message(message: aio_pika.abc.AbstractIncomingMessage) -> None:
     try:
-       
         event_type = message.type or message.routing_key
         raw_event = json.loads(message.body.decode("utf-8"))
     except json.JSONDecodeError as exc:
@@ -25,7 +31,7 @@ async def process_message(message: aio_pika.abc.AbstractIncomingMessage) -> None
     if event_type == "order.confirmed":
         try:
             validated_payload = InvoiceGeneratePayload(**raw_event)
-        
+
             task = generate_order_invoice_task.delay(
                 validated_payload.model_dump(mode="json")
             )
@@ -58,7 +64,7 @@ async def main():
         )
 
         queue = await channel.declare_queue(
-           settings.QUEUE_NAME,
+            settings.QUEUE_NAME,
             durable=True,
         )
 
