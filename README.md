@@ -54,46 +54,7 @@ Redis и RabbitMQ используются как общая инфрастру�
 - ReDoc: `http://localhost:8002/redoc`
 - OpenAPI JSON: `http://localhost:8002/openapi.json`
 
-### `GET /api/v1/documents/{order_id}`
-
-Возвращает документы заказа и временные ссылки на скачивание. Доступ к заказу проверяется в Core.
-
-**Заголовок:**
-
-```http
-Authorization: Bearer <access_token>
-```
-
-**Пример ответа `200 OK`:**
-
-```json
-[
-  {
-    "order_id": "4c5b9c1a-ff1b-4f3e-a2a0-7b6d9f1e2a10",
-    "document_type": "invoice",
-    "original_name": "Счет-заказ №1042.pdf",
-    "created_at": "2026-11-13T09:36:23Z",
-    "download_url": "https://storage.example.com/..."
-  }
-]
-```
-
-Если документов пока нет, сервис возвращает пустой массив `[]`.
-
-Основные ошибки: `401` — отсутствует или отклонен токен; `403` — нет доступа к организации; `404` — заказ не найден или недоступен; `502`/`503`/`504` — ошибка взаимодействия с Core.
-
-### Health check
-
-`GET /health` — liveness-проверка HTTP-приложения. Возвращает `{"status":"ok"}` и не проверяет доступность внешних зависимостей.
-
 ## Запуск
-
-### Требования
-
-- Docker и Docker Compose
-- Запущенная инфраструктура Core: RabbitMQ и Redis
-- Доступный S3/MinIO и созданный bucket
-- Сеть Docker `shared_rabbitmq_net`, к которой подключены RabbitMQ, Redis и сервис
 
 ### Конфигурация
 
