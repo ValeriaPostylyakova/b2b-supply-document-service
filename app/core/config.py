@@ -7,7 +7,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    DEBUG: bool = Field(default=False)
+    DEBUG: bool = Field(default=True)
     SECRET_KEY: str = Field(default="super_secret_key_12345")
     DRF_CORE_URL: str = Field(default="http://django-server:8000")
 
@@ -21,7 +21,8 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str = Field(default="redis")
     REDIS_PORT: int = Field(default=6379)
-    REDIS_DB: int = Field(default=1)
+    REDIS_DB: int = Field(default=2)
+    REDIS_PASSWORD: str = Field(default="")
 
     S3_KEY_ID: str = Field(default="minioadmin")
     S3_SECRET: str = Field(default="minioadmin")
@@ -45,7 +46,7 @@ class Settings(BaseSettings):
 
     @property
     def REDIS_URL(self) -> str:
-        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     @property
     def CELERY_BROKER_URL(self) -> str:
@@ -53,7 +54,7 @@ class Settings(BaseSettings):
 
     @property
     def CELERY_RESULT_BACKEND(self) -> str:
-        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     @property
     def RABBITMQ_URL(self) -> str:

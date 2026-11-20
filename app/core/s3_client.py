@@ -15,7 +15,9 @@ class S3Base:
         self.external_endpoint_url: str = settings.S3_EXTERNAL_URL
 
     @staticmethod
-    def _build_content_disposition(storage_key: str, original_name: str | None = None) -> str:
+    def _build_content_disposition(
+        storage_key: str, original_name: str | None = None
+    ) -> str:
         filename = original_name or storage_key.split("/")[-1]
         encoded_filename = quote(filename)
         return f"attachment; filename*=UTF-8''{encoded_filename}"
@@ -58,7 +60,9 @@ class S3AsyncService(S3Base):
         original_name: str | None = None,
         expires_in: int = 300,
     ) -> str:
-        content_disposition = self._build_content_disposition(storage_key, original_name)
+        content_disposition = self._build_content_disposition(
+            storage_key, original_name
+        )
         async with self.get_client(use_external=True) as client:
             url = await client.generate_presigned_url(
                 "get_object",
@@ -108,7 +112,9 @@ class S3SyncService(S3Base):
         original_name: str | None = None,
         expires_in: int = 300,
     ) -> str:
-        content_disposition = self._build_content_disposition(storage_key, original_name)
+        content_disposition = self._build_content_disposition(
+            storage_key, original_name
+        )
         return self._external_client.generate_presigned_url(
             "get_object",
             Params={
@@ -118,7 +124,7 @@ class S3SyncService(S3Base):
             },
             ExpiresIn=expires_in,
         )
-        
+
     def delete_object(self, storage_key: str) -> None:
         self._internal_client.delete_object(
             Bucket=self.bucket_name,
